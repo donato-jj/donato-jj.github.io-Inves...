@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>El Silencio del Café — Ensayo Visual</title>
+
+<style>
+:root{
+  --ui: rgba(255,255,255,.92);
+  --ui2: rgba(255,255,255,.78);
+  --shadow: rgba(0,0,0,.62);
+  --bg:#0b0a08;
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  height:100%;
+  background:var(--bg);
+  overflow:hidden;
+  font-family: ui-serif, Georgia, serif;
+}
+
+#stage{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  display:block;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:40px;
+}
+
+.panel{
+  width:min(1100px,95vw);
+  border-radius:18px;
+  padding:28px;
+  background:linear-gradient(
+    180deg,
+    rgba(10,9,7,.15),
+    rgba(10,9,7,.70)
+  );
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+
+h1{
+  margin:0 0 14px 0;
+  font-weight:650;
+  color:var(--ui);
+  font-size:clamp(22px,3vw,40px);
+  line-height:1.1;
+  text-shadow:0 12px 34px var(--shadow);
+}
+
+p{
+  margin:0;
+  color:var(--ui2);
+  font-size:clamp(14px,1.3vw,18px);
+  line-height:1.6;
+  max-width:70ch;
+}
+
+/* 🔥 Imagen visible */
+.panel-image{
+  margin-top:22px;
+  width:100%;
+  max-height:280px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+  opacity:.95;
+  transition:opacity .3s ease;
+  pointer-events:auto;
+}
+
+.panel-image:hover{
+  opacity:1;
+}
+
+.subtitle{
+  margin-top:12px;
+  font-size:12px;
+  letter-spacing:.03em;
+  opacity:.65;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="stage"></canvas>
+
+<div class="overlay">
+  <div class="panel">
+    <h1>La percepción del mundo no es lo que vemos: es lo que sentimos como seres humanos.</h1>
+
+    <p>
+      Cada palabra, cada gesto, es el inicio del fin de los tiempos.<br><br>
+      Si querés ir rápido, el tiempo te espera; pero la precisión está en cómo lo utilizás a tu favor.<br><br>
+      La caída del Caído fue por incoherencias, no por desinterés.
+    </p>
+
+    <!-- 🔥 IMAGEN PEGADA EN LA PÁGINA -->
+    <img 
+      src="file_00000000c6d871f5909d2e946fb6aa98.png"
+      alt="Imagen del ensayo"
+      class="panel-image"
+    />
+
+    <div id="subtitle" class="subtitle"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+
+const IMAGE_SRC="file_00000000c6d871f5909d2e946fb6aa98.png";
+
+const canvas=document.getElementById("stage");
+const ctx=canvas.getContext("2d");
+
+let W=0,H=0;
+
+function resize(){
+  W=window.innerWidth;
+  H=window.innerHeight;
+  canvas.width=W;
+  canvas.height=H;
+}
+window.addEventListener("resize",resize);
+resize();
+
+const img=new Image();
+img.src=IMAGE_SRC;
+
+const pointer={x:.5,y:.5,tx:.5,ty:.5};
+
+window.addEventListener("mousemove",e=>{
+  pointer.tx=e.clientX/W;
+  pointer.ty=e.clientY/H;
+});
+
+function drawCover(){
+  if(!img.complete)return;
+
+  const scale=Math.max(W/img.width,H/img.height);
+  const dw=img.width*scale;
+  const dh=img.height*scale;
+
+  pointer.x+=(pointer.tx-pointer.x)*.05;
+  pointer.y+=(pointer.ty-pointer.y)*.05;
+
+  const shiftX=(pointer.x-.5)*-15;
+  const shiftY=(pointer.y-.5)*-15;
+
+  ctx.drawImage(img,(W-dw)/2+shiftX,(H-dh)/2+shiftY,dw,dh);
+}
+
+function vignette(){
+  const g=ctx.createRadialGradient(W*.5,H*.55,60,W*.5,H*.55,Math.max(W,H)*.9);
+  g.addColorStop(0,"rgba(0,0,0,0)");
+  g.addColorStop(1,"rgba(0,0,0,.65)");
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawCover();
+  vignette();
+  requestAnimationFrame(render);
+}
+
+img.onload=()=>requestAnimationFrame(render);
+
+// Typewriter
+const subtitle=document.getElementById("subtitle");
+const text="Revelación: la luz no cae… se retira cuando la coherencia se rompe.";
+let i=0;
+
+function type(){
+  if(i<text.length){
+    subtitle.textContent+=text[i];
+    i++;
+    setTimeout(type,40);
+  }
+}
+
+setTimeout(type,2000);
+
+})();
+</script>
+
+</body>
+</html>
